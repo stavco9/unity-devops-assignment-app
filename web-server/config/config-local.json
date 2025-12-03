@@ -1,0 +1,9 @@
+{
+  "kafka": {
+    "kafkaPropertiesFile": "kafka-dev.properties",
+    "purchaseTopic": "unity-store-dev"
+  },
+  "managementApi": {
+    "baseUrl": "http://localhost:3001"
+  }
+}
