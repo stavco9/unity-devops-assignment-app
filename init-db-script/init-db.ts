@@ -1,6 +1,6 @@
-import { MongoClient, ServerApiVersion } from 'mongodb';
+import { MongoClient, ServerApiVersion, Db, Collection } from 'mongodb';
 import { generateUsername } from "unique-username-generator";
-import { uniqueNamesGenerator, adjectives, colors, animals } from 'unique-names-generator';
+import { uniqueNamesGenerator, adjectives, colors, animals, Config } from 'unique-names-generator';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -15,12 +15,26 @@ const itemCount = 1000;
 const userNumberOfDigits = 3;
 const userMaxLength = 15;
 
-const uniqueNamesConfig = {
+const uniqueNamesConfig: Config = {
     dictionaries: [adjectives, colors, animals]
 }
 
 const minItemPrice = 10;
 const maxItemPrice = 200;
+
+interface User {
+    username: string;
+    email: string;
+    createdAt: Date;
+    purchases: unknown[];
+}
+
+interface Item {
+    name: string;
+    price: number;
+    createdAt: Date;
+    purchasedBy: null;
+}
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -31,7 +45,7 @@ const client = new MongoClient(uri, {
     }
 });
 
-async function generateUser(numberOfDigits, maxLength) {
+async function generateUser(numberOfDigits: number, maxLength: number): Promise<User> {
     const username = generateUsername("", numberOfDigits, maxLength);
     return {
         username: username,
@@ -41,7 +55,7 @@ async function generateUser(numberOfDigits, maxLength) {
     };
 }
 
-async function generateItem(uniqueNamesConfig, minPrice, maxPrice) {
+async function generateItem(uniqueNamesConfig: Config, minPrice: number, maxPrice: number): Promise<Item> {
     const item = uniqueNamesGenerator(uniqueNamesConfig);
     return {
         name: item,
@@ -51,19 +65,19 @@ async function generateItem(uniqueNamesConfig, minPrice, maxPrice) {
     };
 }
 
-async function run() {
+async function run(): Promise<void> {
     try {
       // Connect the client to the server	(optional starting in v4.7)
       await client.connect();
-      const db = client.db(process.env.DB_NAME);
+      const db: Db = client.db(process.env.DB_NAME);
       // Send a ping to confirm a successful connection
       await db.command({ ping: 1 });
 
       console.log("Pinged your deployment. You successfully connected to MongoDB!");
 
-      await insert(db, usersCollectionName, userCount, generateUser, userNumberOfDigits, userMaxLength);
+      await insert<User>(db, usersCollectionName, userCount, generateUser, userNumberOfDigits, userMaxLength);
 
-      await insert(db, itemsCollectionName, itemCount, generateItem, uniqueNamesConfig, minItemPrice, maxItemPrice);
+      await insert<Item>(db, itemsCollectionName, itemCount, generateItem, uniqueNamesConfig, minItemPrice, maxItemPrice);
 
     } catch (error) {
         console.error(`Failed to run: ${error instanceof Error ? error.message : String(error)}`);
@@ -77,7 +91,13 @@ async function run() {
     }
 }
 
-async function insert(db, collectionName, collectionDesiredCount, insertDataFunction, ...args) {
+async function insert<T>(
+    db: Db, 
+    collectionName: string, 
+    collectionDesiredCount: number, 
+    insertDataFunction: (...args: any[]) => Promise<T>, 
+    ...args: any[]
+): Promise<void> {
     try{
         console.log(`Inserting ${collectionName}`);
         if ((await db.listCollections({name: collectionName}).toArray()).length === 0) {
@@ -87,10 +107,10 @@ async function insert(db, collectionName, collectionDesiredCount, insertDataFunc
             console.log(`Collection ${collectionName} already exists`);
         }
 
-        let collectionCount = await db.collection(collectionName).countDocuments();
-        let totalToInsert = collectionDesiredCount - collectionCount;
+        let collectionCount: number = await db.collection(collectionName).countDocuments();
+        let totalToInsert: number = collectionDesiredCount - collectionCount;
 
-        let insertData = [];
+        let insertData: any[] = [];
 
         for (let i = 0; i < totalToInsert; i++) {
             insertData.push(await insertDataFunction(...args));
@@ -100,7 +120,7 @@ async function insert(db, collectionName, collectionDesiredCount, insertDataFunc
             await db.collection(collectionName).insertMany(insertData);
             console.log(`${totalToInsert} ${collectionName} inserted`);
         } else {
-            console.log(`No ${collectionName} to insert`);
+            console.log(`No ${collectionName} to insert, there are already ${collectionCount} documents in the collection`);
         }
     }
     catch (error) {

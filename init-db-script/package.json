@@ -3,7 +3,14 @@
   "description": "",
   "main": "init-db.js",
   "scripts": {
-    "start": "node init-db.js",
+    "dev": "tsx --watch init-db.ts",
+    "start": "node dist/init-db.js",
+    "build": "tsc",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -18,5 +25,11 @@
     "mongoose": "^9.0.0",
     "unique-names-generator": "^4.7.1",
     "unique-username-generator": "^1.5.1"
+  },
+  "devDependencies": {
+    "@tsconfig/node24": "^24.0.3",
+    "@types/express": "^5.0.6",
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
   }
 }
