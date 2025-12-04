@@ -11,7 +11,6 @@ export class PurchaseController {
     private appConfig: AppConfig
   ) {}
 
-  
   async getAllUserBuys(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.query.userId as string;
