@@ -17,7 +17,7 @@ jobs:
         id: detect
         uses: tchupp/actions-detect-directory-changes@v1
         with:
-          included-paths: "./web-server/**"
+          included-paths: "web-server/,management-api/"
 
 
   build-and-push:
