@@ -10,7 +10,7 @@ const config = loadConfig();
 const app = express();
 const port = process.env.PORT || "3000";
 const kafkaService = new KafkaService(config.kafka);
-const restService = new RestService(config.managementApi);
+const restService = new RestService();
 const purchaseRoutes = new PurchaseRoutes(kafkaService, restService, config).getRoutes();
 // Middleware
 app.use(express.json());

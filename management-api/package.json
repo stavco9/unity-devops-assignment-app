@@ -19,7 +19,13 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
-    "express": "^5.2.1"
+    "@aws-sdk/credential-providers": "^3.943.0",
+    "@confluentinc/kafka-javascript": "^1.7.0",
+    "aws4": "^1.13.2",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "get-root-path": "^3.0.1",
+    "mongodb": "^7.0.0"
   },
   "devDependencies": {
     "@tsconfig/node24": "^24.0.3",

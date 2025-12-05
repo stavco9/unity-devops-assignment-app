@@ -21,12 +21,14 @@ const uniqueNamesConfig: Config = {
 
 const minItemPrice = 10;
 const maxItemPrice = 200;
+const initialUserBalance = 1000;
 
 interface User {
     username: string;
     email: string;
     createdAt: Date;
-    purchases: unknown[];
+    purchases: string[];
+    balance: number;
 }
 
 interface Item {
@@ -45,13 +47,14 @@ const client = new MongoClient(uri, {
     }
 });
 
-async function generateUser(numberOfDigits: number, maxLength: number): Promise<User> {
+async function generateUser(numberOfDigits: number, maxLength: number, balance: number): Promise<User> {
     const username = generateUsername("", numberOfDigits, maxLength);
     return {
         username: username,
         email: `${username}@example.com`,
         createdAt: new Date(),
-        purchases: []
+        purchases: [] as string[],
+        balance: balance
     };
 }
 
@@ -75,7 +78,7 @@ async function run(): Promise<void> {
 
       console.log("Pinged your deployment. You successfully connected to MongoDB!");
 
-      await insert<User>(db, usersCollectionName, userCount, generateUser, userNumberOfDigits, userMaxLength);
+      await insert<User>(db, usersCollectionName, userCount, generateUser, userNumberOfDigits, userMaxLength, initialUserBalance);
 
       await insert<Item>(db, itemsCollectionName, itemCount, generateItem, uniqueNamesConfig, minItemPrice, maxItemPrice);
 

@@ -10,7 +10,7 @@ export class PurchaseMessage implements KafkaMessage {
     value: string;
   
     constructor(purchaseRequest: PurchaseRequest) {
-      this.key = purchaseRequest.userId;
+      this.key = purchaseRequest.username;
       this.value = JSON.stringify(purchaseRequest);
     }
   }

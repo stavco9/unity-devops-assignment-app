@@ -1,0 +1,81 @@
+import { readFileSync } from "fs";
+import { KafkaJS as Kafka } from "@confluentinc/kafka-javascript";
+import type { KafkaConfig } from "../config/config.js";
+//import type { KafkaMessage } from "../model/KafkaMessage.js";
+import { rootPath } from 'get-root-path';
+import { join } from "path";
+
+export type MessageHandler = (message: Kafka.Message, topic: string, partition: number) => Promise<void>;
+
+export class KafkaService {
+  private consumer: Kafka.Consumer;
+
+  constructor(config: KafkaConfig) {
+    try { 
+      const kafkaProperties = this.readKafkaProperties(config.kafkaPropertiesFile);
+      const kafka = new Kafka.Kafka();
+
+      this.consumer = kafka.consumer(kafkaProperties);
+    } catch (error) {
+      throw new Error(
+        `Failed to read Kafka properties from ${config.kafkaPropertiesFile}: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+  }
+
+  readKafkaProperties(kafkaPropertiesFile: string): Record<string, string> {
+    const data = readFileSync(join(rootPath, 'config', kafkaPropertiesFile), "utf8").toString().split("\n");
+    return data.reduce((config: Record<string, string>, line: string) => {
+        const [key, value] = line.split("=");
+        if (key && value) {
+            config[key] = value;
+        }
+        return config;
+    }, {});
+  }
+
+  async connect(): Promise<void> {
+    try {
+      await this.consumer.connect();
+      console.log("Kafka consumer connected");
+    } catch (error) {
+      console.warn(
+        `Kafka consumer connection warning: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+  }
+
+  async disconnect(): Promise<void> {
+    try {
+      await this.consumer.disconnect();
+      console.log("Kafka consumer disconnected");
+    } catch (error) {
+      console.warn(
+        `Kafka consumer disconnection warning: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+  }
+
+  async consume(kafkaTopic: string, messageHandler?: MessageHandler): Promise<void> {
+    try {
+      // subscribe to the topic
+      await this.consumer.subscribe({ topics: [kafkaTopic] });
+
+      // consume messages from the topic
+      this.consumer.run({
+        eachMessage: async ({ topic, partition, message }: { topic: string, partition: number, message: Kafka.Message }) => {
+          if (messageHandler) {
+            await messageHandler(message, topic, partition);
+          } else {
+            // Default behavior: just log the message
+            console.log(`Consumed message from topic ${topic}, partition ${partition}: key = ${message.key?.toString()}, value = ${message.value?.toString()}`);
+          }
+        },
+      });
+    } catch (error) {
+      console.warn(
+        `Kafka consumer consumption warning: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+  }
+}
