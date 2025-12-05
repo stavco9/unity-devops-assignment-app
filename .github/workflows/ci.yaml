@@ -51,7 +51,7 @@ jobs:
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
+        working-directory: ./${{ matrix.project }}
         with:
-          context: ./${{ matrix.project }}
           push: true
           tags: ghcr.io/${{ github.repository }}/${{ matrix.project }}:${{ steps.package-version.outputs.NODE_VERSION }}
