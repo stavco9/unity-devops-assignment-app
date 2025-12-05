@@ -11,13 +11,13 @@ jobs:
       changed: ${{ steps.detect.outputs.changed }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
 
       - name: Detect Directory Changes
         id: detect
         uses: tchupp/actions-detect-directory-changes@v1
-        #with:
-        #  included-paths: "web-server/,management-api/"
+        with:
+          included-paths: "web-server/,management-api/"
 
   build-and-push:
     name: "Build and Push"
@@ -30,7 +30,7 @@ jobs:
         project: ${{ fromJSON(needs.detect-directory-changes.outputs.changed) }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
       - name: get-npm-version
         id: package-version
         run: |
