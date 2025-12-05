@@ -53,13 +53,9 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       # The built in docker/build-push-action@v5 didn't work for another directory, so I had to use a custom step.
-      - name: Print Docker registry path
-        run: |
-          echo "Docker registry path: $DOCKER_REGISTRY_PATH"
       - name: Build and push Docker image
-        run: |
-          echo "Building and pushing Docker image for ${{ matrix.project }}"
-          DOCKER_REGISTRY_PATH=ghcr.io/${{ github.repository }}/${{ matrix.project }}:${{ steps.package-version.outputs.NODE_VERSION }}
-          docker build -t $DOCKER_REGISTRY_PATH .
-          docker push $DOCKER_REGISTRY_PATH
-          echo "Docker image pushed to $DOCKER_REGISTRY_PATH"	
+        uses: docker/build-push-action@v5
+        with:
+          context: ./${{ matrix.project }}
+          push: true
+          tags: ghcr.io/${{ github.repository }}/${{ matrix.project }}:${{ steps.package-version.outputs.NODE_VERSION }}
