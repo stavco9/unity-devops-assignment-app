@@ -1,7 +1,7 @@
 {
   "name": "management-api",
   "version": "1.0.0",
-  "description": "",
+  "description": "Change me 15",
   "main": "index.js",
   "scripts": {
     "dev": "tsx --watch src/index.ts",
