@@ -18,6 +18,10 @@ jobs:
         uses: tchupp/actions-detect-directory-changes@v1
         with:
           included-paths: "web-server/,management-api/"
+      
+      - name: Print changed directories
+        run: |
+          echo "Changed directories are: ${{ steps.detect.outputs.changed }}"
 
   build-and-push:
     name: "Build and Push"
