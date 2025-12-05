@@ -1,0 +1,36 @@
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'web-server/**'
+
+env:
+  SERVICE_NAME: web-server
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: get-npm-version
+        id: package-version
+        run: |
+          NODE_VERSION=$(node -p -e "require('./${{ env.SERVICE_NAME }}/package.json').version")
+          echo "NODE_VERSION=${NODE_VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./${{ env.SERVICE_NAME }}
+          push: true
+          tags: ghcr.io/${{ github.repository }}/${{ env.SERVICE_NAME }}:${{ steps.package-version.outputs.NODE_VERSION }}
