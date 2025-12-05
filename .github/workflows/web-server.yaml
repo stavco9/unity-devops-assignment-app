@@ -2,26 +2,37 @@ on:
   push:
     branches:
       - master
-    paths:
-      - 'web-server/**'
-
-env:
-  SERVICE_NAME: web-server
 
 jobs:
+  detect-directory-changes:
+    name: "Detect Directory Changes"
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.detect.outputs.changed }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect Directory Changes
+        id: detect
+        uses: tchupp/actions-detect-directory-changes@v1
+        with:
+          included-paths: "web-server/**,management-api/**"
+
+
   build-and-push:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
+    strategy:
+      matrix:
+        project: ${{ fromJSON(needs.detect-directory-changes.outputs.changed) }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
       - name: get-npm-version
         id: package-version
         run: |
-          NODE_VERSION=$(node -p -e "require('./${{ env.SERVICE_NAME }}/package.json').version")
+          NODE_VERSION=$(node -p -e "require('./${{ matrix.project }}/package.json').version")
           echo "NODE_VERSION=${NODE_VERSION}" >> $GITHUB_OUTPUT
 
       - name: Log in to GitHub Container Registry
@@ -34,6 +45,6 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./${{ env.SERVICE_NAME }}
+          context: ./${{ matrix.project }}
           push: true
-          tags: ghcr.io/${{ github.repository }}/${{ env.SERVICE_NAME }}:${{ steps.package-version.outputs.NODE_VERSION }}
+          tags: ghcr.io/${{ github.repository }}/${{ matrix.project }}:${{ steps.package-version.outputs.NODE_VERSION }}
