@@ -20,36 +20,43 @@ export class PurchaseController {
         return;
       }
 
-      console.log(`Fetching user buys for username: ${username}`);
-
       const usersCollection: string = this.appConfig.mongoDb.usersCollectionName;
       const itemsCollection: string = this.appConfig.mongoDb.itemsCollectionName;
-      const userDetails: Document = await this.mongoService.aggregateJoinQuery(usersCollection, { 
-        username: username }, { 
-            from: itemsCollection, localField: "purchases", foreignField: "_id", as: "purchaseditems"
-        });
-      if (!userDetails || userDetails.length === 0) {
+      const userDetails: User | null = await this.getUserDetails(usersCollection, itemsCollection, username);
+      if (!userDetails) {
         res.status(404).json({ error: `User ${username} not found` });
         return;
       }
-
-      const user: User = userDetails[0] as User;
-       
+ 
       console.log(`User buys fetched successfully for username: ${username}`);
 
-      const purchaseResponse: PurchaseResponse = {
-        username: user.username,
-        email: user.email,
-        purchaseditems: user.purchaseditems.map((purchase: Item) => ({name: purchase.name, price: purchase.price, purchasedAt: purchase.purchasedAt})),
-        balance: user.balance
-      };
-
-      res.status(200).json(purchaseResponse);
+      res.status(200).json(this.getPurchaseResponse(userDetails));
       return;
     } catch (error) {
       console.error("Error in getAllUserBuys:", error);
       res.status(500).json({ error: "Failed to fetch user buys" });
       return;
     }
+  }
+
+  private async getUserDetails(usersCollectionName: string, itemsCollectionName: string, username: string): Promise<User | null> {
+    console.log(`Fetching user buys for username: ${username} from collection: ${usersCollectionName}`);
+    const userDetails: Document = await this.mongoService.aggregateJoinQuery(usersCollectionName, { 
+      username: username }, { 
+          from: itemsCollectionName, localField: "purchases", foreignField: "_id", as: "purchaseditems"
+      });
+    if (!userDetails || userDetails.length === 0) {
+      return null;
+    }
+    return userDetails[0] as User;
+  }
+
+  private getPurchaseResponse(userDetails: User): PurchaseResponse {
+    return {
+      username: userDetails.username,
+      email: userDetails.email,
+      purchaseditems: userDetails.purchaseditems.map((purchase: Item) => ({name: purchase.name, price: purchase.price, purchasedAt: purchase.purchasedAt})),
+      balance: userDetails.balance
+    };
   }
 }
