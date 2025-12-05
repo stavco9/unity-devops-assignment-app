@@ -12,6 +12,7 @@ const port = process.env.PORT || "3000";
 const kafkaService = new KafkaService(config.kafka);
 const restService = new RestService();
 const purchaseRoutes = new PurchaseRoutes(kafkaService, restService, config).getRoutes();
+let ready: boolean = false;
 // Middleware
 app.use(express.json());
 
@@ -21,12 +22,21 @@ app.get("/", (req, res): void => {
   console.log("Response sent");
 });
 
+app.get("/health", (req, res): void => {
+  if (ready) {
+    res.status(200).send("OK");
+  } else {
+    res.status(503).send("Service not ready yet");
+  }
+});
+
 app.use(purchaseRoutes)
 
 const server: Server = app.listen(port, async (): Promise<void> => {
   await kafkaService.connect();
   console.log(`Web server listening on port ${port}`);
   console.log(`Environment: ${process.env.ENVIRONMENT || "dev"}`);
+  ready = true;
 });
 
 // Handle graceful shutdown signals (SIGINT from Ctrl+C, SIGTERM from process managers)

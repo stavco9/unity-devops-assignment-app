@@ -14,6 +14,7 @@ const kafkaService = new KafkaService(config.kafka);
 const mongoService = new MongoService(config.mongoDb);
 const purchaseHandler = new PurchaseHandler(mongoService, config);
 const purchaseRoutes = new PurchaseRoutes(mongoService, config).getRoutes();
+let ready: boolean = false;
 
 // Middleware
 app.use(express.json());
@@ -22,6 +23,14 @@ app.use(express.json());
 app.get("/", (req, res): void => {
   res.send("Hello World from management-api!");
   console.log("Response sent");
+});
+
+app.get("/health", (req, res): void => {
+  if (ready) {
+    res.status(200).send("OK");
+  } else {
+    res.status(503).send("Service not ready yet");
+  }
 });
 
 app.use(purchaseRoutes)
@@ -35,6 +44,7 @@ const server: Server = app.listen(port, async (): Promise<void> => {
   await mongoService.connect();
   console.log(`Management API listening on port ${port}`);
   console.log(`Environment: ${process.env.ENVIRONMENT || "dev"}`);
+  ready = true;
 });
 
 // Handle graceful shutdown signals (SIGINT from Ctrl+C, SIGTERM from process managers)
