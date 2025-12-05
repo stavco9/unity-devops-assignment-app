@@ -1,7 +1,7 @@
 {
   "name": "web-server",
   "version": "1.0.0",
-  "description": "Change me",
+  "description": "Change me 2",
   "main": "index.js",
   "scripts": {
     "dev": "tsx --watch src/index.ts",
