@@ -16,11 +16,11 @@ jobs:
       - name: Detect Directory Changes
         id: detect
         uses: tchupp/actions-detect-directory-changes@v1
-        with:
-          included-paths: "web-server/,management-api/"
-
+        #with:
+        #  included-paths: "web-server/,management-api/"
 
   build-and-push:
+    name: "Build and Push"
     runs-on: ubuntu-latest
     permissions:
       contents: read
