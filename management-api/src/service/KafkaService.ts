@@ -1,9 +1,9 @@
 import { readFileSync } from "fs";
 import { KafkaJS as Kafka } from "@confluentinc/kafka-javascript";
 import type { KafkaConfig } from "../config/config.js";
-//import type { KafkaMessage } from "../model/KafkaMessage.js";
 import { rootPath } from 'get-root-path';
 import { join } from "path";
+import logger from "../utils/logger.js";
 
 export type MessageHandler = (message: Kafka.Message, topic: string, partition: number) => Promise<void>;
 
@@ -37,9 +37,9 @@ export class KafkaService {
   async connect(): Promise<void> {
     try {
       await this.consumer.connect();
-      console.log("Kafka consumer connected");
+      logger.info("Kafka consumer connected");
     } catch (error) {
-      console.warn(
+      logger.warn(
         `Kafka consumer connection warning: ${error instanceof Error ? error.message : String(error)}`
       );
     }
@@ -48,9 +48,9 @@ export class KafkaService {
   async disconnect(): Promise<void> {
     try {
       await this.consumer.disconnect();
-      console.log("Kafka consumer disconnected");
+      logger.info("Kafka consumer disconnected");
     } catch (error) {
-      console.warn(
+      logger.warn(
         `Kafka consumer disconnection warning: ${error instanceof Error ? error.message : String(error)}`
       );
     }
@@ -68,12 +68,12 @@ export class KafkaService {
             await messageHandler(message, topic, partition);
           } else {
             // Default behavior: just log the message
-            console.log(`Consumed message from topic ${topic}, partition ${partition}: key = ${message.key?.toString()}, value = ${message.value?.toString()}`);
+            logger.info(`Consumed message from topic ${topic}, partition ${partition}: key = ${message.key?.toString()}, value = ${message.value?.toString()}`);
           }
         },
       });
     } catch (error) {
-      console.warn(
+      logger.warn(
         `Kafka consumer consumption warning: ${error instanceof Error ? error.message : String(error)}`
       );
     }

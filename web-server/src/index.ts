@@ -5,6 +5,7 @@ import { KafkaService } from "./service/KafkaService.js";
 import { RestService } from "./service/RestService.js";
 import { loadConfig } from "./config/config.js";
 import { PurchaseRoutes } from "./routes/PurchaseRoutes.js";
+import logger from "./utils/logger.js";
 
 const config = loadConfig();
 const app = express();
@@ -19,7 +20,7 @@ app.use(express.json());
 // Routes
 app.get("/", (req, res): void => {
   res.send("Hello World from web-server!");
-  console.log("Response sent");
+  logger.info("Response sent");
 });
 
 app.get("/health", (req, res): void => {
@@ -34,8 +35,8 @@ app.use(purchaseRoutes)
 
 const server: Server = app.listen(port, async (): Promise<void> => {
   await kafkaService.connect();
-  console.log(`Web server listening on port ${port}`);
-  console.log(`Environment: ${process.env.ENVIRONMENT || "dev"}`);
+  logger.info(`Web server listening on port ${port}`);
+  logger.info(`Environment: ${process.env.ENVIRONMENT || "dev"}`);
   ready = true;
 });
 
@@ -49,10 +50,10 @@ process.on('SIGTERM', async () => {
 });
 
 async function gracefulShutdown(signalType: string, kafkaService: KafkaService, server: Server): Promise<void> {
-  console.log(`Received ${signalType} signal. Shutting down gracefully...`);
+  logger.info(`Received ${signalType} signal. Shutting down gracefully...`);
   await kafkaService.disconnect();
   server.close(() => {
-    console.log('HTTP server closed.');
+    logger.info('HTTP server closed.');
     process.exit(0);
   });
 }

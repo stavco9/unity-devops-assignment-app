@@ -5,6 +5,7 @@ import type { PurchaseResponse } from "../models/PurchaseResponse.js";
 import type { User } from "../models/User.js";
 import type { Item } from "../models/Item.js";
 import type { AppConfig } from "../config/config.js";
+import logger from "../utils/logger.js";
 export class PurchaseController {
   constructor(
     private mongoService: MongoService,
@@ -28,19 +29,19 @@ export class PurchaseController {
         return;
       }
  
-      console.log(`User buys fetched successfully for username: ${username}`);
+      logger.info(`User buys fetched successfully for username: ${username}`);
 
       res.status(200).json(this.getPurchaseResponse(userDetails));
       return;
     } catch (error) {
-      console.error("Error in getAllUserBuys:", error);
+      logger.error("Error in getAllUserBuys:", error);
       res.status(500).json({ error: "Failed to fetch user buys" });
       return;
     }
   }
 
   private async getUserDetails(usersCollectionName: string, itemsCollectionName: string, username: string): Promise<User | null> {
-    console.log(`Fetching user buys for username: ${username} from collection: ${usersCollectionName}`);
+    logger.info(`Fetching user buys for username: ${username} from collection: ${usersCollectionName}`);
     const userDetails: Document = await this.mongoService.aggregateJoinQuery(usersCollectionName, { 
       username: username }, { 
           from: itemsCollectionName, localField: "purchases", foreignField: "_id", as: "purchaseditems"

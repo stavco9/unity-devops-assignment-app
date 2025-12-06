@@ -1,6 +1,7 @@
 import { MongoClient, ServerApiVersion } from "mongodb";
 import type { Db, Filter, Document, WithId, UpdateFilter, UpdateResult } from "mongodb";
 import type { MongoDbConfig } from "../config/config.js";
+import logger from "../utils/logger.js";
 
 export class MongoService {
     private client: MongoClient;
@@ -26,7 +27,7 @@ export class MongoService {
     async connect(): Promise<void> {
         try {
             await this.client.connect();
-            console.log("MongoDB connected");
+            logger.info("MongoDB connected");
         } catch (error) {
             throw new Error(
                 `Failed to connect to MongoDB: ${error instanceof Error ? error.message : String(error)}`
@@ -37,7 +38,7 @@ export class MongoService {
     async disconnect(): Promise<void> {
         try {
             await this.client.close();
-            console.log("MongoDB disconnected");
+            logger.info("MongoDB disconnected");
         } catch (error) {
             throw new Error(
                 `Failed to disconnect from MongoDB: ${error instanceof Error ? error.message : String(error)}`
@@ -85,7 +86,7 @@ export class MongoService {
         try {
             const collection = this.db.collection<Document>(collectionName);
             await collection.updateOne(query, update);
-            console.log(`Updated ${collectionName} document with query ${JSON.stringify(query)} and update ${JSON.stringify(update)}`);
+            logger.info(`Updated ${collectionName} document with query ${JSON.stringify(query)} and update ${JSON.stringify(update)}`);
         } catch (error) {
             throw new Error(
                 `Failed to update MongoDB: ${error instanceof Error ? error.message : String(error)}`

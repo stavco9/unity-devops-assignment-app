@@ -6,6 +6,7 @@ import { MongoService } from "./service/MongoService.js";
 import { loadConfig } from "./config/config.js";
 import { PurchaseHandler } from "./handlers/PurchaseHandler.js";
 import { PurchaseRoutes } from "./routes/PurchaseRoutes.js";
+import logger from "./utils/logger.js";
 
 const config = loadConfig();
 const app = express();
@@ -22,7 +23,7 @@ app.use(express.json());
 // Routes
 app.get("/", (req, res): void => {
   res.send("Hello World from management-api!");
-  console.log("Response sent");
+  logger.info("Response sent");
 });
 
 app.get("/health", (req, res): void => {
@@ -42,8 +43,8 @@ const server: Server = app.listen(port, async (): Promise<void> => {
     await purchaseHandler.handle(message, topic, partition);
   });
   await mongoService.connect();
-  console.log(`Management API listening on port ${port}`);
-  console.log(`Environment: ${process.env.ENVIRONMENT || "dev"}`);
+  logger.info(`Management API listening on port ${port}`);
+  logger.info(`Environment: ${process.env.ENVIRONMENT || "dev"}`);
   ready = true;
 });
 
@@ -57,11 +58,11 @@ process.on('SIGTERM', async () => {
 });
 
 async function gracefulShutdown(signalType: string, kafkaService: KafkaService, mongoService: MongoService, server: Server): Promise<void> {
-  console.log(`Received ${signalType} signal. Shutting down gracefully...`);
+  logger.info(`Received ${signalType} signal. Shutting down gracefully...`);
   await kafkaService.disconnect();
   await mongoService.disconnect();
   server.close(() => {
-    console.log('HTTP server closed.');
+    logger.info('HTTP server closed.');
     process.exit(0);
   });
 }

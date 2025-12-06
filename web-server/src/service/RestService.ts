@@ -1,4 +1,5 @@
 import type { ManagementApiConfig } from "../config/config.js";
+import logger from "../utils/logger.js";
 
 export class RestService {
   async getRequest<T>(baseUrl: string, uri: string, queryParams: Record<string, string>): Promise<[number, T]> {
@@ -11,7 +12,7 @@ export class RestService {
 
     const url = `${baseUrl}/${uri}${queryString}`;
 
-    console.log(`Sending GET request to ${url}`);
+    logger.info(`Sending GET request to ${url}`);
     
     try {
       const response = await fetch(url, {

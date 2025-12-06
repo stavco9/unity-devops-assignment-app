@@ -2,6 +2,7 @@ import { rootPath } from 'get-root-path';
 import dotenv from 'dotenv';
 import { readFileSync, existsSync } from "fs";
 import { join } from "path";
+import logger from "../utils/logger.js";
 
 export interface KafkaConfig {
   kafkaPropertiesFile: string;
@@ -26,9 +27,9 @@ function loadEnv(environment: string): void {
   const envPath = join(rootPath, 'config', `.env.${environment}`);
   if (existsSync(envPath)) {
     dotenv.config({ path: envPath });
-    console.log(`Environment variables loaded from ${envPath}`);
+    logger.info(`Environment variables loaded from ${envPath}`);
   } else {
-    console.log(`Using default environment variables for environment: ${environment}`);
+    logger.info(`Using default environment variables for environment: ${environment}`);
   }
 }
 

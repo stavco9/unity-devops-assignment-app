@@ -4,6 +4,7 @@ import type { KafkaConfig } from "../config/config.js";
 import type { KafkaMessage } from "../model/KafkaMessage.js";
 import { rootPath } from 'get-root-path';
 import { join } from "path";
+import logger from "../utils/logger.js";
 
 export class KafkaService {
   private producer: Kafka.Producer;
@@ -35,9 +36,9 @@ export class KafkaService {
   async connect(): Promise<void> {
     try {
       await this.producer.connect();
-      console.log("Kafka producer connected (mock)");
+      logger.info("Kafka producer connected (mock)");
     } catch (error) {
-      console.warn(
+      logger.warn(
         `Kafka connection warning (mock mode): ${error instanceof Error ? error.message : String(error)}`
       );
       // In mock mode, we continue even if connection fails
@@ -47,9 +48,9 @@ export class KafkaService {
   async disconnect(): Promise<void> {
     try {
       await this.producer.disconnect();
-      console.log("Kafka producer disconnected");
+      logger.info("Kafka producer disconnected");
     } catch (error) {
-      console.warn(
+      logger.warn(
         `Kafka disconnection warning: ${error instanceof Error ? error.message : String(error)}`
       );
     }
@@ -61,7 +62,7 @@ export class KafkaService {
         topic: kafkaTopic,
         messages: [kafkaMessage],
       });
-      console.log(`Purchase sent to Kafka topic ${kafkaTopic}:`, kafkaMessage);
+      logger.info(`Purchase sent to Kafka topic ${kafkaTopic}:`, kafkaMessage);
     } catch (error) {
       throw new Error(
         `Failed to send purchase to Kafka: ${error instanceof Error ? error.message : String(error)}`

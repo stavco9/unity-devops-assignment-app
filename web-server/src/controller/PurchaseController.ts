@@ -5,6 +5,7 @@ import type { PurchaseRequest } from "../model/PurchaseRequest.js";
 import type { PurchaseResponse } from "../model/PurchaseResponse.js";
 import type { AppConfig } from "../config/config.js";
 import { PurchaseMessage } from "../model/KafkaMessage.js";
+import logger from "../utils/logger.js";
 export class PurchaseController {
   constructor(
     private restService: RestService,
@@ -30,7 +31,7 @@ export class PurchaseController {
       res.status(status).json(result);
       return;
     } catch (error) {
-      console.error("Error in getAllUserBuys:", error);
+      logger.error("Error in getAllUserBuys:", error);
       res.status(500).json({ error: "Failed to fetch user buys" });
       return;
     }
@@ -55,7 +56,7 @@ export class PurchaseController {
         purchaseRequest,
       });
     } catch (error) {
-      console.error("Error in purchase:", error);
+      logger.error("Error in purchase:", error);
       res.status(500).json({
         error: "Failed to process purchase",
         message: error instanceof Error ? error.message : String(error),
