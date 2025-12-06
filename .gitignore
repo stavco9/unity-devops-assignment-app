@@ -3,3 +3,4 @@ node_modules
 dist
 kafka-dev.properties
 *.spec.js
+.env.local
