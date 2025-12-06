@@ -17,7 +17,7 @@ jobs:
         id: detect
         uses: tchupp/actions-detect-directory-changes@v1
         with:
-          included-paths: "./web-server/**,./management-api/**"
+          included-paths: "./web-server/,./web-server/**,./management-api/,./management-api/**"
       
       - name: Print changed directories
         run: |
@@ -33,16 +33,18 @@ jobs:
     strategy:
       matrix:
         project: ${{ fromJSON(needs.detect-directory-changes.outputs.changed) }}
-    defaults:
-      run:
-        working-directory: ./${{ matrix.project }}
     steps:
+      - name: Get the project directory
+        id: get-project-directory
+        run: |
+          PROJECT_DIRECTORY=$(echo ${{ matrix.project }} | cut -d '/' -f 1	)
+          echo "PROJECT_DIRECTORY=${PROJECT_DIRECTORY}" >> $GITHUB_OUTPUT
       - name: Checkout
         uses: actions/checkout@v4
       - name: get-npm-version
         id: package-version
         run: |
-          NODE_VERSION=$(node -p -e "require('./package.json').version")
+          NODE_VERSION=$(node -p -e "require('./${{ steps.get-project-directory.outputs.PROJECT_DIRECTORY }}/package.json').version")
           echo "NODE_VERSION=${NODE_VERSION}" >> $GITHUB_OUTPUT
 
       - name: Log in to GitHub Container Registry
@@ -56,6 +58,6 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./${{ matrix.project }}
+          context: ./${{ steps.get-project-directory.outputs.PROJECT_DIRECTORY }}
           push: true
-          tags: ghcr.io/${{ github.repository }}/${{ matrix.project }}:${{ steps.package-version.outputs.NODE_VERSION }}
+          tags: ghcr.io/${{ github.repository }}/${{ steps.get-project-directory.outputs.PROJECT_DIRECTORY }}:${{ steps.package-version.outputs.NODE_VERSION }}
