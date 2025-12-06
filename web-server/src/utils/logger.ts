@@ -1,5 +1,6 @@
 import winston from 'winston';
 
+// Winston logger configuration.
 const logger = winston.createLogger({
   level: (process.env.LOG_LEVEL || 'info').toLowerCase(),
   format: winston.format.combine(

@@ -3,6 +3,7 @@ import { PurchaseController } from "../controllers/PurchaseController.js";
 import { MongoService } from "../service/MongoService.js";
 import type { AppConfig } from "../config/config.js";
 
+// Purchase routes class. Handles the purchase routes.
 export class PurchaseRoutes {
   private purchaseRoutes: Router;
   private purchaseController: PurchaseController;
@@ -12,6 +13,7 @@ export class PurchaseRoutes {
     this.purchaseController = new PurchaseController(mongoService, config);
   }
 
+  // Get all items purchased by a user.
   getRoutes(): Router {
     this.purchaseRoutes.get("/getAllUserBuys", (req, res): void => {
       this.purchaseController.getAllUserBuys(req, res);

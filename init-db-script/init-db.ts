@@ -15,12 +15,17 @@ const itemCount = 1000;
 const userNumberOfDigits = 3;
 const userMaxLength = 15;
 
+// Set the configuration for the unique names generator for the items.
+// The items names will be generated using the adjectives, colors and animals dictionaries.
 const uniqueNamesConfig: Config = {
     dictionaries: [adjectives, colors, animals]
 }
 
+// The minimum and maximum available price of the items.
 const minItemPrice = 10;
 const maxItemPrice = 200;
+
+// The initial balance of the users.
 const initialUserBalance = 1000;
 
 interface User {
@@ -47,6 +52,7 @@ const client = new MongoClient(uri, {
     }
 });
 
+// Generate a random user with a random username, email and a fixed balance.
 async function generateUser(numberOfDigits: number, maxLength: number, balance: number): Promise<User> {
     const username = generateUsername("", numberOfDigits, maxLength);
     return {
@@ -58,6 +64,7 @@ async function generateUser(numberOfDigits: number, maxLength: number, balance: 
     };
 }
 
+// Generate a random item with a random name, price and set the purchased by field to null since it's not purchased yet.
 async function generateItem(uniqueNamesConfig: Config, minPrice: number, maxPrice: number): Promise<Item> {
     const item = uniqueNamesGenerator(uniqueNamesConfig);
     return {
@@ -68,18 +75,22 @@ async function generateItem(uniqueNamesConfig: Config, minPrice: number, maxPric
     };
 }
 
+// Run the script to insert the users and items into the database.
 async function run(): Promise<void> {
     try {
-      // Connect the client to the server	(optional starting in v4.7)
+      // Connect the client to the MongoDB cluster.
       await client.connect();
       const db: Db = client.db(process.env.DB_NAME);
+
       // Send a ping to confirm a successful connection
       await db.command({ ping: 1 });
 
       console.log("Pinged your deployment. You successfully connected to MongoDB!");
 
+      // Insert the users into the database.
       await insert<User>(db, usersCollectionName, userCount, generateUser, userNumberOfDigits, userMaxLength, initialUserBalance);
 
+      // Insert the items into the database.
       await insert<Item>(db, itemsCollectionName, itemCount, generateItem, uniqueNamesConfig, minItemPrice, maxItemPrice);
 
     } catch (error) {
@@ -94,6 +105,9 @@ async function run(): Promise<void> {
     }
 }
 
+// Insert the data into the specified collection.
+// It's a generic function that can be used to insert any type of data into any collection.
+// It's also creates the collection if it doesn't exist.
 async function insert<T>(
     db: Db, 
     collectionName: string, 
@@ -102,6 +116,7 @@ async function insert<T>(
     ...args: any[]
 ): Promise<void> {
     try{
+        // Check if the collection exists and create it if it doesn't.
         console.log(`Inserting ${collectionName}`);
         if ((await db.listCollections({name: collectionName}).toArray()).length === 0) {
             await db.createCollection(collectionName);
@@ -110,15 +125,20 @@ async function insert<T>(
             console.log(`Collection ${collectionName} already exists`);
         }
 
+        // Get the current count of documents in the collection.
         let collectionCount: number = await db.collection(collectionName).countDocuments();
+
+        // Calculate the number of documents to insert.
         let totalToInsert: number = collectionDesiredCount - collectionCount;
 
         let insertData: any[] = [];
 
+        // Build the object to insert by the insertDataFunction parameter based on the object type.
         for (let i = 0; i < totalToInsert; i++) {
             insertData.push(await insertDataFunction(...args));
         }
 
+        // Insert the documents into the collection if there are any to insert.
         if (insertData.length > 0) {
             await db.collection(collectionName).insertMany(insertData);
             console.log(`${totalToInsert} ${collectionName} inserted`);
@@ -131,4 +151,5 @@ async function insert<T>(
     }
 }
 
+// Run the script to insert the users and items into the database.
 await run();

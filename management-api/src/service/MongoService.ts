@@ -3,11 +3,12 @@ import type { Db, Filter, Document, WithId, UpdateFilter, UpdateResult } from "m
 import type { MongoDbConfig } from "../config/config.js";
 import logger from "../utils/logger.js";
 
+// Mongo service class. Handles the MongoDB operations.
 export class MongoService {
     private client: MongoClient;
     private db: Db;
 
-
+    // Constructor. Initializes the MongoDB client and database.
     constructor(config: MongoDbConfig) {
         try {
             const uri = `mongodb+srv://${config.dbHost}/?authSource=%24external&authMechanism=${config.dbAuthMechanism}&appName=${config.dbName}`;
@@ -24,6 +25,7 @@ export class MongoService {
         }
     }
 
+    // Connect to the MongoDB cluster.
     async connect(): Promise<void> {
         try {
             await this.client.connect();
@@ -35,6 +37,7 @@ export class MongoService {
         }
     }
 
+    // Disconnect from the MongoDB cluster.
     async disconnect(): Promise<void> {
         try {
             await this.client.close();
@@ -46,6 +49,7 @@ export class MongoService {
         }
     }
 
+    // Perform a simple query on the specified collection.
     async simpleQuery(collectionName: string, query: Filter<Document>): Promise<WithId<Document>[]> {
         try {
             const collection = this.db.collection<Document>(collectionName);
@@ -58,6 +62,7 @@ export class MongoService {
         }
     }
 
+    // Perform an aggregate query on the specified collection with a sample size.
     async aggregateSampleQuery(collectionName: string, query: Filter<Document>, count: number): Promise<Document> {
         try {
             const collection = this.db.collection<Document>(collectionName);
@@ -70,6 +75,7 @@ export class MongoService {
         }
     }
 
+    // Perform an aggregate join query on the specified collection.
     async aggregateJoinQuery(collectionName: string, query: Filter<Document>, lookup: Filter<Document>): Promise<Document> {
         try {
             const collection = this.db.collection<Document>(collectionName);
@@ -82,6 +88,7 @@ export class MongoService {
         }
     }
 
+    // Update a single document in the specified collection.
     async updateSingleDocument(collectionName: string, query: Filter<Document>, update: UpdateFilter<Document> | Document[]): Promise<void> {
         try {
             const collection = this.db.collection<Document>(collectionName);

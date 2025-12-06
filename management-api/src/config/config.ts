@@ -22,7 +22,9 @@ export interface AppConfig {
   mongoDb: MongoDbConfig;
 }
 
-// Mainly for local development, to avoid having to set environment variables in the terminal. In Kubernetes, we use the secret manager to set the environment variables.
+// Loads the file .env.<environment> from the root config directory.
+// Used just for local development, to avoid having to set environment variables in the terminal.
+// In Kubernetes, we already have the environment variables set by the Kubernetes deployment manifest.
 function loadEnv(environment: string): void {
   const envPath = join(rootPath, 'config', `.env.${environment}`);
   if (existsSync(envPath)) {
@@ -33,12 +35,14 @@ function loadEnv(environment: string): void {
   }
 }
 
+// Load the configuration from the specified file.
+// The configuration file is a JSON file under the root config directory.
+// It's name is config-<environment>.json.
 export function loadConfig(): AppConfig {
   const environment = process.env.ENVIRONMENT || "local";
   loadEnv(environment);
   const configPath = join(rootPath, 'config', `config-${environment}.json`);
 
-  
   try {
     const configFile = readFileSync(configPath, "utf-8");
     return JSON.parse(configFile) as AppConfig;

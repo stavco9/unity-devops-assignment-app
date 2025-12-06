@@ -16,6 +16,9 @@ export interface AppConfig {
   managementApi: ManagementApiConfig;
 }
 
+// Load the configuration from the specified file.
+// The configuration file is a JSON file under the root config directory.
+// It's name is config-<environment>.json.
 export function loadConfig(): AppConfig {
   const environment = process.env.ENVIRONMENT || "local";
   const configPath = join(rootPath, 'config', `config-${environment}.json`);

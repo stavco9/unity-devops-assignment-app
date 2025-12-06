@@ -24,6 +24,4 @@ RUN npm ci --only=production
 
 COPY --from=build /app/dist ./dist
 
-COPY --from=build /app/config ./config
-
 CMD ["node", "dist/index.js"]
