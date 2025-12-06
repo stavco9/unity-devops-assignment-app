@@ -1,7 +1,7 @@
 import winston from 'winston';
 
 const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || 'info',
+  level: (process.env.LOG_LEVEL || 'info').toLowerCase(),
   format: winston.format.combine(
     winston.format.timestamp(),
     winston.format.errors({ stack: true }),
@@ -10,13 +10,12 @@ const logger = winston.createLogger({
   defaultMeta: { service: 'management-api' },
   transports: [
     new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple()
-      )
+        format: winston.format.combine(
+          winston.format.colorize(),
+          winston.format.simple()
+        )
     })
   ]
 });
 
 export default logger;
-
