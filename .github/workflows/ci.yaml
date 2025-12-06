@@ -54,7 +54,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # The built in docker/build-push-action@v5 didn't work for another directory, so I had to use a custom step.
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
