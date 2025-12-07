@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unity Store - Purchase Management</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Unity Store</h1>
+        <div class="form-group">
+            <label for="username">Username:</label>
+            <input type="text" id="username" maxlength="15" placeholder="Enter username" />
+        </div>
+        <div class="form-group">
+            <label for="maxPrice">Max Price:</label>
+            <input type="number" id="maxPrice" placeholder="Enter max price" min="10" max="200" step="1" />
+        </div>
+        <div class="button-group">
+            <button id="purchaseBtn" onclick="handlePurchase()">Purchase</button>
+            <button id="getPurchasesBtn" onclick="handleGetPurchases()">Get All User Purchases</button>
+        </div>
+        <div id="output" class="output"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import type { Server } from "http";
 import { KafkaService } from "./service/KafkaService.js";
 import { RestService } from "./service/RestService.js";
@@ -35,8 +36,10 @@ app.get("/health", (req, res): void => {
   }
 });
 
+app.use(cors());
+
 // Purchase routes
-app.use(purchaseRoutes)
+app.use(purchaseRoutes);
 
 // Start the server and connect to Kafka cluster.
 const server: Server = app.listen(port, async (): Promise<void> => {
